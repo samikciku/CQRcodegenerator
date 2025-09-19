@@ -4,6 +4,7 @@ import Preview from './components/Preview'
 import CustomizationPanel from './components/CustomizationPanel'
 import ExportOptions from './components/ExportOptions'
 import LogoUploader from './components/LogoUploader'
+import TextOptions from './components/TextOptions'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
 import OfflineIndicator from './components/OfflineIndicator'
 import { usePerformanceMonitor } from './hooks/usePerformance'
@@ -25,6 +26,15 @@ function App() {
     borderWidth: 0,
     borderColor: '#FFFFFF',
     opacity: 1.0
+  })
+  const [textOptions, setTextOptions] = useState({
+    showText: false,
+    textAbove: '',
+    textBelow: '',
+    fontSize: 16,
+    textColor: '#000000',
+    textAlign: 'center',
+    fontWeight: 'medium'
   })
 
   // Performance monitoring
@@ -63,6 +73,11 @@ function App() {
               setLogoOptions={setLogoOptions}
             />
             
+            <TextOptions
+              textOptions={textOptions}
+              setTextOptions={setTextOptions}
+            />
+            
             <CustomizationPanel 
               customization={customization}
               setCustomization={setCustomization}
@@ -74,6 +89,7 @@ function App() {
             <Preview 
               qrCodeUrl={qrCodeUrl}
               qrData={qrData}
+              textOptions={textOptions}
             />
             
             <ExportOptions 
