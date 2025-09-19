@@ -87,7 +87,7 @@ function App() {
       <footer className="bg-white border-t mt-16">
         <div className="container mx-auto px-4 py-6">
           <p className="text-center text-gray-600">
-            Made with ❤️ using React and open source technologies
+            Made with ❤️ using React and open source technologies by CyberFuzz
           </p>
           {process.env.NODE_ENV === 'development' && (
             <div className="text-center text-xs text-gray-400 mt-2">
