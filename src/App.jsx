@@ -54,9 +54,9 @@ function App() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Mobile Layout - QR Generator First, then Preview */}
+        {/* Mobile Layout - Custom Order */}
         <div className="block lg:hidden space-y-6">
-          {/* QR Code Generation - Mobile First */}
+          {/* FIRST: Generate QR Code */}
           <QRGenerator 
             qrData={qrData}
             setQrData={setQrData}
@@ -66,38 +66,38 @@ function App() {
             logoOptions={logoOptions}
           />
           
-          {/* QR Code Preview - Mobile Second */}
+          {/* SECOND: QR Code Preview */}
           <Preview 
             qrCodeUrl={qrCodeUrl}
             qrData={qrData}
             textOptions={textOptions}
           />
           
-          {/* Export Options - Mobile Third */}
+          {/* THIRD: Text Options */}
+          <TextOptions
+            textOptions={textOptions}
+            setTextOptions={setTextOptions}
+          />
+          
+          {/* FOURTH: Customization */}
+          <CustomizationPanel 
+            customization={customization}
+            setCustomization={setCustomization}
+          />
+          
+          {/* FIFTH: Logo Settings */}
+          <LogoUploader
+            logoFile={logoFile}
+            setLogoFile={setLogoFile}
+            logoOptions={logoOptions}
+            setLogoOptions={setLogoOptions}
+          />
+          
+          {/* SIXTH: Export Options */}
           <ExportOptions 
             qrCodeUrl={qrCodeUrl}
             qrData={qrData}
           />
-          
-          {/* Additional Controls - Mobile Bottom */}
-          <div className="space-y-6">
-            <LogoUploader
-              logoFile={logoFile}
-              setLogoFile={setLogoFile}
-              logoOptions={logoOptions}
-              setLogoOptions={setLogoOptions}
-            />
-            
-            <TextOptions
-              textOptions={textOptions}
-              setTextOptions={setTextOptions}
-            />
-            
-            <CustomizationPanel 
-              customization={customization}
-              setCustomization={setCustomization}
-            />
-          </div>
         </div>
 
         {/* Desktop Layout - Original Two Column */}
