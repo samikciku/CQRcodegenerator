@@ -54,7 +54,53 @@ function App() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Mobile Layout - QR Code Preview First */}
+        <div className="block lg:hidden space-y-6">
+          {/* QR Code Preview - Mobile Top */}
+          <Preview 
+            qrCodeUrl={qrCodeUrl}
+            qrData={qrData}
+            textOptions={textOptions}
+          />
+          
+          {/* Export Options - Mobile Second */}
+          <ExportOptions 
+            qrCodeUrl={qrCodeUrl}
+            qrData={qrData}
+          />
+          
+          {/* Input and Controls - Mobile Bottom */}
+          <div className="space-y-6">
+            <QRGenerator 
+              qrData={qrData}
+              setQrData={setQrData}
+              customization={customization}
+              setQrCodeUrl={setQrCodeUrl}
+              logoFile={logoFile}
+              logoOptions={logoOptions}
+            />
+            
+            <LogoUploader
+              logoFile={logoFile}
+              setLogoFile={setLogoFile}
+              logoOptions={logoOptions}
+              setLogoOptions={setLogoOptions}
+            />
+            
+            <TextOptions
+              textOptions={textOptions}
+              setTextOptions={setTextOptions}
+            />
+            
+            <CustomizationPanel 
+              customization={customization}
+              setCustomization={setCustomization}
+            />
+          </div>
+        </div>
+
+        {/* Desktop Layout - Original Two Column */}
+        <div className="hidden lg:grid lg:grid-cols-2 gap-8">
           {/* Left Column - Input and Controls */}
           <div className="space-y-6">
             <QRGenerator 
