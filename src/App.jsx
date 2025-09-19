@@ -54,32 +54,33 @@ function App() {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Mobile Layout - QR Code Preview First */}
+        {/* Mobile Layout - QR Generator First, then Preview */}
         <div className="block lg:hidden space-y-6">
-          {/* QR Code Preview - Mobile Top */}
+          {/* QR Code Generation - Mobile First */}
+          <QRGenerator 
+            qrData={qrData}
+            setQrData={setQrData}
+            customization={customization}
+            setQrCodeUrl={setQrCodeUrl}
+            logoFile={logoFile}
+            logoOptions={logoOptions}
+          />
+          
+          {/* QR Code Preview - Mobile Second */}
           <Preview 
             qrCodeUrl={qrCodeUrl}
             qrData={qrData}
             textOptions={textOptions}
           />
           
-          {/* Export Options - Mobile Second */}
+          {/* Export Options - Mobile Third */}
           <ExportOptions 
             qrCodeUrl={qrCodeUrl}
             qrData={qrData}
           />
           
-          {/* Input and Controls - Mobile Bottom */}
+          {/* Additional Controls - Mobile Bottom */}
           <div className="space-y-6">
-            <QRGenerator 
-              qrData={qrData}
-              setQrData={setQrData}
-              customization={customization}
-              setQrCodeUrl={setQrCodeUrl}
-              logoFile={logoFile}
-              logoOptions={logoOptions}
-            />
-            
             <LogoUploader
               logoFile={logoFile}
               setLogoFile={setLogoFile}
