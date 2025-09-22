@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import QRGenerator from './components/QRGenerator'
 import Preview from './components/Preview'
 import CustomizationPanel from './components/CustomizationPanel'
@@ -164,6 +165,9 @@ function App() {
       {/* PWA Components */}
       <PWAInstallPrompt />
       <OfflineIndicator />
+      
+      {/* Vercel Analytics */}
+      <Analytics />
     </div>
   )
 }
