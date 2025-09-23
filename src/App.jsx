@@ -169,7 +169,7 @@ function App() {
       
       {/* Vercel Analytics */}
       <Analytics />
-      <SpeedInsights />
+      <SpeedInsights debug />
     </div>
   )
 }
