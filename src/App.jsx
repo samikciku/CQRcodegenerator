@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import QRGenerator from './components/QRGenerator'
@@ -41,6 +41,31 @@ function App() {
 
   // Performance monitoring
   const performanceMetrics = usePerformanceMonitor()
+
+  // Debug analytics loading
+  useEffect(() => {
+    console.log('App loaded, checking analytics...')
+    
+    // Check if analytics scripts are loaded
+    const checkAnalyticsScripts = () => {
+      const analyticsScript = document.querySelector('script[src*="vercel-analytics"]')
+      const speedInsightsScript = document.querySelector('script[src*="speed-insights"]')
+      
+      console.log('Analytics script found:', !!analyticsScript)
+      console.log('Speed Insights script found:', !!speedInsightsScript)
+      
+      if (analyticsScript) {
+        console.log('Analytics script src:', analyticsScript.src)
+      }
+      if (speedInsightsScript) {
+        console.log('Speed Insights script src:', speedInsightsScript.src)
+      }
+    }
+    
+    // Check immediately and after a delay
+    checkAnalyticsScripts()
+    setTimeout(checkAnalyticsScripts, 2000)
+  }, [])
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -170,6 +195,13 @@ function App() {
       {/* Vercel Analytics */}
       <Analytics />
       <SpeedInsights debug />
+      
+      {/* Debug info for development */}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ position: 'fixed', bottom: '10px', right: '10px', background: 'black', color: 'white', padding: '5px', fontSize: '12px', zIndex: 9999 }}>
+          Analytics & SpeedInsights Components Loaded
+        </div>
+      )}
     </div>
   )
 }
