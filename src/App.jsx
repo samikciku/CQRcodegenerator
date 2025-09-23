@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import QRGenerator from './components/QRGenerator'
 import Preview from './components/Preview'
 import CustomizationPanel from './components/CustomizationPanel'
@@ -168,6 +169,7 @@ function App() {
       
       {/* Vercel Analytics */}
       <Analytics />
+      <SpeedInsights />
     </div>
   )
 }
