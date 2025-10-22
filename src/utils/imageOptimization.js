@@ -72,11 +72,11 @@ export const resizeImage = (file, maxSize = 1024) => {
 }
 
 export const validateImageFile = (file) => {
-  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
+  const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
   const maxSize = 5 * 1024 * 1024 // 5MB
 
   if (!validTypes.includes(file.type)) {
-    throw new Error('Invalid file type. Please select a JPEG, PNG, GIF, or WebP image.')
+    throw new Error('Invalid file type. Please select a JPEG, PNG, GIF, WebP, or SVG image.')
   }
 
   if (file.size > maxSize) {

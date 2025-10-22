@@ -12,7 +12,19 @@ const LogoUploader = ({ logoFile, setLogoFile, logoOptions, setLogoOptions }) =>
       // Validate file
       validateImageFile(file)
       
-      // Compress image for better performance
+      // Handle SVG files differently (no compression needed)
+      if (file.type === 'image/svg+xml') {
+        setLogoFile(file)
+        
+        // Create preview URL for SVG
+        const url = URL.createObjectURL(file)
+        setPreviewUrl(url)
+        
+        console.log(`SVG file uploaded: ${file.size} bytes`)
+        return
+      }
+      
+      // Compress raster images for better performance
       const compressedFile = await compressImage(file, 800, 0.8)
       
       // Get image dimensions
@@ -70,12 +82,12 @@ const LogoUploader = ({ logoFile, setLogoFile, logoOptions, setLogoOptions }) =>
         {/* File Upload */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Upload Logo/Image
+            Upload Logo/Image (JPEG, PNG, GIF, WebP, SVG)
           </label>
           <div className="flex items-center space-x-4">
             <input
               type="file"
-              accept="image/*"
+              accept="image/*,.svg"
               onChange={handleFileUpload}
               className="hidden"
               id="logo-upload"
