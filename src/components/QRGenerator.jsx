@@ -59,8 +59,8 @@ const QRGenerator = ({
 
   // Memoize cache key to prevent unnecessary recalculations
   const cacheKey = useMemo(() => {
-    return generateCacheKey(debouncedQrData, customization, logoFile)
-  }, [debouncedQrData, customization, logoFile, generateCacheKey])
+    return generateCacheKey(debouncedQrData, customization, logoFile, logoOptions)
+  }, [debouncedQrData, customization, logoFile, logoOptions, generateCacheKey])
 
   // Optimized QR generation with caching
   useEffect(() => {

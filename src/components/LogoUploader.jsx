@@ -120,12 +120,27 @@ const LogoUploader = ({ logoFile, setLogoFile, logoOptions, setLogoOptions }) =>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Preview
             </label>
-            <div className="w-20 h-20 border border-gray-300 rounded-lg overflow-hidden">
+            <div className="w-20 h-20 border border-gray-300 rounded-lg overflow-hidden relative">
               <img 
                 src={previewUrl} 
                 alt="Logo preview"
                 className="w-full h-full object-cover"
+                style={{
+                  opacity: logoOptions.opacity,
+                  borderRadius: logoOptions.shape === 'circle' ? '50%' : 
+                               logoOptions.shape === 'rounded' ? '10%' : '0%'
+                }}
               />
+              {logoOptions.borderWidth > 0 && (
+                <div 
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    border: `${logoOptions.borderWidth}px solid ${logoOptions.borderColor}`,
+                    borderRadius: logoOptions.shape === 'circle' ? '50%' : 
+                                 logoOptions.shape === 'rounded' ? '10%' : '0%'
+                  }}
+                />
+              )}
             </div>
           </div>
         )}

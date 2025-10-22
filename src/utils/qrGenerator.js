@@ -111,7 +111,16 @@ const embedLogo = (qrCodeDataURL, logoFile, qrSize, logoOptions = {}) => {
         } else if (options.shape === 'rounded') {
           const radius = logoSize * 0.1
           ctx.beginPath()
-          ctx.roundRect(x, y, logoSize, logoSize, radius)
+          // Use manual rounded rectangle since roundRect is not widely supported
+          ctx.moveTo(x + radius, y)
+          ctx.lineTo(x + logoSize - radius, y)
+          ctx.quadraticCurveTo(x + logoSize, y, x + logoSize, y + radius)
+          ctx.lineTo(x + logoSize, y + logoSize - radius)
+          ctx.quadraticCurveTo(x + logoSize, y + logoSize, x + logoSize - radius, y + logoSize)
+          ctx.lineTo(x + radius, y + logoSize)
+          ctx.quadraticCurveTo(x, y + logoSize, x, y + logoSize - radius)
+          ctx.lineTo(x, y + radius)
+          ctx.quadraticCurveTo(x, y, x + radius, y)
           ctx.clip()
         }
         // For square shape, no clipping needed

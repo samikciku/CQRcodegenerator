@@ -172,9 +172,10 @@ export const useQRCache = () => {
     })
   }, [])
 
-  const generateCacheKey = useCallback((text, customization, logoFile) => {
+  const generateCacheKey = useCallback((text, customization, logoFile, logoOptions) => {
     const logoKey = logoFile ? `${logoFile.name}-${logoFile.size}-${logoFile.lastModified}` : 'no-logo'
-    return `${text}-${JSON.stringify(customization)}-${logoKey}`
+    const logoOptionsKey = logoOptions ? JSON.stringify(logoOptions) : 'no-logo-options'
+    return `${text}-${JSON.stringify(customization)}-${logoKey}-${logoOptionsKey}`
   }, [])
 
   return { getCachedQR, setCachedQR, generateCacheKey }
