@@ -82,14 +82,50 @@ const embedLogo = (qrCodeDataURL, logoFile, qrSize, logoOptions = {}) => {
             y = (qrSize - logoSize) / 2
         }
         
-        // Set opacity
+        // Draw white background for logo visibility
+        ctx.save()
+        ctx.fillStyle = '#FFFFFF'
+        ctx.globalAlpha = 1.0
+        
+        // Calculate background size (logo size + padding)
+        const backgroundPadding = logoSize * 0.1 // 10% padding around logo
+        const backgroundSize = logoSize + (backgroundPadding * 2)
+        const backgroundX = x - backgroundPadding
+        const backgroundY = y - backgroundPadding
+        
+        // Draw white background based on shape
+        if (options.shape === 'circle') {
+          ctx.beginPath()
+          ctx.arc(x + logoSize/2, y + logoSize/2, backgroundSize/2, 0, 2 * Math.PI)
+          ctx.fill()
+        } else if (options.shape === 'rounded') {
+          const radius = backgroundSize * 0.1
+          ctx.beginPath()
+          ctx.moveTo(backgroundX + radius, backgroundY)
+          ctx.lineTo(backgroundX + backgroundSize - radius, backgroundY)
+          ctx.quadraticCurveTo(backgroundX + backgroundSize, backgroundY, backgroundX + backgroundSize, backgroundY + radius)
+          ctx.lineTo(backgroundX + backgroundSize, backgroundY + backgroundSize - radius)
+          ctx.quadraticCurveTo(backgroundX + backgroundSize, backgroundY + backgroundSize, backgroundX + backgroundSize - radius, backgroundY + backgroundSize)
+          ctx.lineTo(backgroundX + radius, backgroundY + backgroundSize)
+          ctx.quadraticCurveTo(backgroundX, backgroundY + backgroundSize, backgroundX, backgroundY + backgroundSize - radius)
+          ctx.lineTo(backgroundX, backgroundY + radius)
+          ctx.quadraticCurveTo(backgroundX, backgroundY, backgroundX + radius, backgroundY)
+          ctx.fill()
+        } else {
+          // Square background
+          ctx.fillRect(backgroundX, backgroundY, backgroundSize, backgroundSize)
+        }
+        ctx.restore()
+        
+        // Set opacity for logo
         ctx.globalAlpha = options.opacity
         
-        // Draw border if specified
+        // Draw border if specified (on top of white background)
         if (options.borderWidth > 0) {
           ctx.save()
           ctx.strokeStyle = options.borderColor
           ctx.lineWidth = options.borderWidth
+          ctx.globalAlpha = 1.0
           
           if (options.shape === 'circle') {
             ctx.beginPath()

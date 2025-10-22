@@ -120,11 +120,21 @@ const LogoUploader = ({ logoFile, setLogoFile, logoOptions, setLogoOptions }) =>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Preview
             </label>
-            <div className="w-20 h-20 border border-gray-300 rounded-lg overflow-hidden relative">
+            <p className="text-xs text-gray-500 mb-2">
+              Logo will have a white background for better visibility against QR code pattern
+            </p>
+            <div className="w-20 h-20 border border-gray-300 rounded-lg overflow-hidden relative bg-gray-100">
+              <div 
+                className="absolute inset-2 bg-white rounded-lg"
+                style={{
+                  borderRadius: logoOptions.shape === 'circle' ? '50%' : 
+                               logoOptions.shape === 'rounded' ? '10%' : '0%'
+                }}
+              />
               <img 
                 src={previewUrl} 
                 alt="Logo preview"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover relative z-10"
                 style={{
                   opacity: logoOptions.opacity,
                   borderRadius: logoOptions.shape === 'circle' ? '50%' : 
@@ -133,7 +143,7 @@ const LogoUploader = ({ logoFile, setLogoFile, logoOptions, setLogoOptions }) =>
               />
               {logoOptions.borderWidth > 0 && (
                 <div 
-                  className="absolute inset-0 pointer-events-none"
+                  className="absolute inset-0 pointer-events-none z-20"
                   style={{
                     border: `${logoOptions.borderWidth}px solid ${logoOptions.borderColor}`,
                     borderRadius: logoOptions.shape === 'circle' ? '50%' : 
