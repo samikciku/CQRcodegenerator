@@ -8,6 +8,36 @@ const BarcodeCustomizationPanel = ({ customization, setCustomization }) => {
     }))
   }
 
+  // Conversion: 1mm = 3.7795 pixels at 96 DPI (standard screen)
+  // For printing: 1mm = 7.992 pixels at 203 DPI (common barcode printer)
+  // Using 203 DPI for better print accuracy
+  const MM_TO_PX = 7.992 // 203 DPI / 25.4mm per inch
+  const PX_TO_MM = 1 / MM_TO_PX
+
+  // Convert mm to px for width (bar width in mm)
+  const widthInMm = customization.widthMm !== undefined ? customization.widthMm : (customization.width || 2) * PX_TO_MM
+  const heightInMm = customization.heightMm !== undefined ? customization.heightMm : (customization.height || 100) * PX_TO_MM
+
+  const handleWidthChange = (value, isMm) => {
+    if (isMm) {
+      handleChange('widthMm', parseFloat(value))
+      handleChange('width', value * MM_TO_PX)
+    } else {
+      handleChange('width', parseFloat(value))
+      handleChange('widthMm', value * PX_TO_MM)
+    }
+  }
+
+  const handleHeightChange = (value, isMm) => {
+    if (isMm) {
+      handleChange('heightMm', parseFloat(value))
+      handleChange('height', value * MM_TO_PX)
+    } else {
+      handleChange('height', parseInt(value))
+      handleChange('heightMm', value * PX_TO_MM)
+    }
+  }
+
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">
@@ -17,42 +47,78 @@ const BarcodeCustomizationPanel = ({ customization, setCustomization }) => {
       <div className="space-y-4">
         {/* Width Control */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Bar Width: {customization.width || 2}
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Bar Width
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                min="0.1"
+                max="5"
+                step="0.1"
+                value={widthInMm.toFixed(2)}
+                onChange={(e) => handleWidthChange(e.target.value, true)}
+                className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="mm"
+              />
+              <span className="text-xs text-gray-500">mm</span>
+            </div>
+          </div>
           <input
             type="range"
-            min="1"
+            min="0.1"
             max="5"
-            step="0.5"
-            value={customization.width || 2}
-            onChange={(e) => handleChange('width', parseFloat(e.target.value))}
+            step="0.1"
+            value={widthInMm}
+            onChange={(e) => handleWidthChange(e.target.value, true)}
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>1px</span>
-            <span>5px</span>
+            <span>0.1mm</span>
+            <span>5mm</span>
           </div>
+          <p className="text-xs text-gray-400 mt-1">
+            ≈ {(widthInMm * MM_TO_PX).toFixed(1)}px at 203 DPI (print resolution)
+          </p>
         </div>
 
         {/* Height Control */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Height: {customization.height || 100}px
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Height
+            </label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                min="5"
+                max="100"
+                step="1"
+                value={Math.round(heightInMm)}
+                onChange={(e) => handleHeightChange(e.target.value, true)}
+                className="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary-500"
+                placeholder="mm"
+              />
+              <span className="text-xs text-gray-500">mm</span>
+            </div>
+          </div>
           <input
             type="range"
-            min="50"
-            max="300"
-            step="10"
-            value={customization.height || 100}
-            onChange={(e) => handleChange('height', parseInt(e.target.value))}
+            min="5"
+            max="100"
+            step="1"
+            value={Math.round(heightInMm)}
+            onChange={(e) => handleHeightChange(e.target.value, true)}
             className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
           />
           <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>50px</span>
-            <span>300px</span>
+            <span>5mm</span>
+            <span>100mm</span>
           </div>
+          <p className="text-xs text-gray-400 mt-1">
+            ≈ {Math.round(heightInMm * MM_TO_PX)}px at 203 DPI (print resolution)
+          </p>
         </div>
 
         {/* Color Controls */}

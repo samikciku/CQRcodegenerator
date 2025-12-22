@@ -49,8 +49,10 @@ function App() {
   const [barcodeFormat, setBarcodeFormat] = useState('CODE128')
   const [barcodeUrl, setBarcodeUrl] = useState('')
   const [barcodeCustomization, setBarcodeCustomization] = useState({
-    width: 2,
-    height: 100,
+    width: 2, // pixels (will be converted from mm)
+    widthMm: 0.25, // millimeters (default ~2px at 203 DPI)
+    height: 100, // pixels (will be converted from mm)
+    heightMm: 12.5, // millimeters (default ~100px at 203 DPI)
     foregroundColor: '#000000',
     backgroundColor: '#FFFFFF',
     displayValue: true,
