@@ -1,17 +1,20 @@
 import React from 'react'
 
-const Preview = ({ qrCodeUrl, qrData, textOptions }) => {
+const Preview = ({ codeUrl, codeData, textOptions, mode = 'qr' }) => {
+  const isQR = mode === 'qr'
+  const isBarcode = mode === 'barcode'
+  
   return (
     <div className="bg-white rounded-lg shadow-sm border p-6">
       <h2 className="text-xl font-semibold text-gray-900 mb-4">
         Preview
       </h2>
       
-      <div className="qr-preview flex flex-col items-center justify-center min-h-[300px]">
-        {qrCodeUrl ? (
-          <div className="text-center">
-            {/* Text Above QR Code */}
-            {textOptions.showText && textOptions.textAbove && (
+      <div className={`${isQR ? 'qr-preview' : 'barcode-preview'} flex flex-col items-center justify-center min-h-[300px]`}>
+        {codeUrl ? (
+          <div className="text-center w-full">
+            {/* Text Above (QR Code only) */}
+            {isQR && textOptions?.showText && textOptions?.textAbove && (
               <div className="mb-4">
                 <p 
                   className="text-gray-800 font-medium break-words"
@@ -20,7 +23,8 @@ const Preview = ({ qrCodeUrl, qrData, textOptions }) => {
                     color: textOptions.textColor,
                     textAlign: textOptions.textAlign,
                     fontWeight: textOptions.fontWeight,
-                    maxWidth: '300px'
+                    maxWidth: '300px',
+                    margin: '0 auto'
                   }}
                 >
                   {textOptions.textAbove}
@@ -28,15 +32,17 @@ const Preview = ({ qrCodeUrl, qrData, textOptions }) => {
               </div>
             )}
 
-            {/* QR Code */}
-            <img 
-              src={qrCodeUrl} 
-              alt="Generated QR Code"
-              className="max-w-full h-auto rounded-lg shadow-sm"
-            />
+            {/* QR Code or Barcode */}
+            <div className="flex justify-center">
+              <img 
+                src={codeUrl} 
+                alt={isQR ? "Generated QR Code" : "Generated Barcode"}
+                className={`max-w-full h-auto rounded-lg shadow-sm ${isBarcode ? 'max-w-md' : ''}`}
+              />
+            </div>
 
-            {/* Text Below QR Code */}
-            {textOptions.showText && textOptions.textBelow && (
+            {/* Text Below (QR Code only) */}
+            {isQR && textOptions?.showText && textOptions?.textBelow && (
               <div className="mt-4">
                 <p 
                   className="text-gray-800 font-medium break-words"
@@ -45,7 +51,8 @@ const Preview = ({ qrCodeUrl, qrData, textOptions }) => {
                     color: textOptions.textColor,
                     textAlign: textOptions.textAlign,
                     fontWeight: textOptions.fontWeight,
-                    maxWidth: '300px'
+                    maxWidth: '300px',
+                    margin: '0 auto'
                   }}
                 >
                   {textOptions.textBelow}
@@ -54,9 +61,14 @@ const Preview = ({ qrCodeUrl, qrData, textOptions }) => {
             )}
 
             {/* Default scan instruction */}
-            {!textOptions.showText && (
+            {isQR && !textOptions?.showText && (
               <p className="text-sm text-gray-600 mt-4">
                 Scan this QR code with your device
+              </p>
+            )}
+            {isBarcode && (
+              <p className="text-sm text-gray-600 mt-4">
+                Scan this barcode with a barcode scanner
               </p>
             )}
           </div>
@@ -67,8 +79,12 @@ const Preview = ({ qrCodeUrl, qrData, textOptions }) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
             </div>
-            <p className="text-lg font-medium">No QR Code Generated</p>
-            <p className="text-sm">Enter some text above to generate a QR code</p>
+            <p className="text-lg font-medium">
+              {isQR ? 'No QR Code Generated' : 'No Barcode Generated'}
+            </p>
+            <p className="text-sm">
+              {isQR ? 'Enter some text above to generate a QR code' : 'Enter barcode data above to generate a barcode'}
+            </p>
           </div>
         )}
       </div>

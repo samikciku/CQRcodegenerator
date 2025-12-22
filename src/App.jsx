@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from '@vercel/speed-insights/react'
 import QRGenerator from './components/QRGenerator'
+import BarcodeGenerator from './components/BarcodeGenerator'
 import Preview from './components/Preview'
 import CustomizationPanel from './components/CustomizationPanel'
+import BarcodeCustomizationPanel from './components/BarcodeCustomizationPanel'
 import ExportOptions from './components/ExportOptions'
 import LogoUploader from './components/LogoUploader'
 import TextOptions from './components/TextOptions'
@@ -12,6 +14,9 @@ import OfflineIndicator from './components/OfflineIndicator'
 import { usePerformanceMonitor } from './hooks/usePerformance'
 
 function App() {
+  const [mode, setMode] = useState('qr') // 'qr' or 'barcode'
+  
+  // QR Code state
   const [qrData, setQrData] = useState('')
   const [qrCodeUrl, setQrCodeUrl] = useState('')
   const [logoFile, setLogoFile] = useState(null)
@@ -37,6 +42,21 @@ function App() {
     textColor: '#000000',
     textAlign: 'center',
     fontWeight: 'medium'
+  })
+
+  // Barcode state
+  const [barcodeData, setBarcodeData] = useState('')
+  const [barcodeFormat, setBarcodeFormat] = useState('CODE128')
+  const [barcodeUrl, setBarcodeUrl] = useState('')
+  const [barcodeCustomization, setBarcodeCustomization] = useState({
+    width: 2,
+    height: 100,
+    foregroundColor: '#000000',
+    backgroundColor: '#FFFFFF',
+    displayValue: true,
+    fontSize: 20,
+    textPosition: 'bottom',
+    margin: 10
   })
 
   // Performance monitoring
@@ -72,106 +92,205 @@ function App() {
       <header className="bg-white shadow-sm border-b">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-3xl font-bold text-gray-900 text-center">
-            QR Code Generator
+            QR Code & Barcode Generator
           </h1>
           <p className="text-gray-600 text-center mt-2">
-            Generate QR codes with custom logos - Simple and free
+            Generate QR codes and barcodes with custom options - Simple and free
           </p>
+          
+          {/* Mode Selector */}
+          <div className="flex justify-center mt-4">
+            <div className="inline-flex rounded-lg border border-gray-300 bg-white p-1">
+              <button
+                onClick={() => setMode('qr')}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                  mode === 'qr'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                QR Code
+              </button>
+              <button
+                onClick={() => setMode('barcode')}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${
+                  mode === 'barcode'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                Barcode
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        {/* Mobile Layout - Custom Order */}
-        <div className="block lg:hidden space-y-6">
-          {/* FIRST: Generate QR Code */}
-          <QRGenerator 
-            qrData={qrData}
-            setQrData={setQrData}
-            customization={customization}
-            setQrCodeUrl={setQrCodeUrl}
-            logoFile={logoFile}
-            logoOptions={logoOptions}
-          />
-          
-          {/* SECOND: QR Code Preview */}
-          <Preview 
-            qrCodeUrl={qrCodeUrl}
-            qrData={qrData}
-            textOptions={textOptions}
-          />
-          
-          {/* THIRD: Text Options */}
-          <TextOptions
-            textOptions={textOptions}
-            setTextOptions={setTextOptions}
-          />
-          
-          {/* FOURTH: Customization */}
-          <CustomizationPanel 
-            customization={customization}
-            setCustomization={setCustomization}
-          />
-          
-          {/* FIFTH: Logo Settings */}
-          <LogoUploader
-            logoFile={logoFile}
-            setLogoFile={setLogoFile}
-            logoOptions={logoOptions}
-            setLogoOptions={setLogoOptions}
-          />
-          
-          {/* SIXTH: Export Options */}
-          <ExportOptions 
-            qrCodeUrl={qrCodeUrl}
-            qrData={qrData}
-          />
-        </div>
+        {mode === 'qr' ? (
+          <>
+            {/* Mobile Layout - Custom Order */}
+            <div className="block lg:hidden space-y-6">
+              {/* FIRST: Generate QR Code */}
+              <QRGenerator 
+                qrData={qrData}
+                setQrData={setQrData}
+                customization={customization}
+                setQrCodeUrl={setQrCodeUrl}
+                logoFile={logoFile}
+                logoOptions={logoOptions}
+              />
+              
+              {/* SECOND: QR Code Preview */}
+              <Preview 
+                codeUrl={qrCodeUrl}
+                codeData={qrData}
+                textOptions={textOptions}
+                mode="qr"
+              />
+              
+              {/* THIRD: Text Options */}
+              <TextOptions
+                textOptions={textOptions}
+                setTextOptions={setTextOptions}
+              />
+              
+              {/* FOURTH: Customization */}
+              <CustomizationPanel 
+                customization={customization}
+                setCustomization={setCustomization}
+              />
+              
+              {/* FIFTH: Logo Settings */}
+              <LogoUploader
+                logoFile={logoFile}
+                setLogoFile={setLogoFile}
+                logoOptions={logoOptions}
+                setLogoOptions={setLogoOptions}
+              />
+              
+              {/* SIXTH: Export Options */}
+              <ExportOptions 
+                codeUrl={qrCodeUrl}
+                codeData={qrData}
+                mode="qr"
+              />
+            </div>
 
-        {/* Desktop Layout - Original Two Column */}
-        <div className="hidden lg:grid lg:grid-cols-2 gap-8">
-          {/* Left Column - Input and Controls */}
-          <div className="space-y-6">
-            <QRGenerator 
-              qrData={qrData}
-              setQrData={setQrData}
-              customization={customization}
-              setQrCodeUrl={setQrCodeUrl}
-              logoFile={logoFile}
-              logoOptions={logoOptions}
-            />
-            
-            <LogoUploader
-              logoFile={logoFile}
-              setLogoFile={setLogoFile}
-              logoOptions={logoOptions}
-              setLogoOptions={setLogoOptions}
-            />
-            
-            <TextOptions
-              textOptions={textOptions}
-              setTextOptions={setTextOptions}
-            />
-            
-            <CustomizationPanel 
-              customization={customization}
-              setCustomization={setCustomization}
-            />
-          </div>
+            {/* Desktop Layout - Original Two Column */}
+            <div className="hidden lg:grid lg:grid-cols-2 gap-8">
+              {/* Left Column - Input and Controls */}
+              <div className="space-y-6">
+                <QRGenerator 
+                  qrData={qrData}
+                  setQrData={setQrData}
+                  customization={customization}
+                  setQrCodeUrl={setQrCodeUrl}
+                  logoFile={logoFile}
+                  logoOptions={logoOptions}
+                />
+                
+                <LogoUploader
+                  logoFile={logoFile}
+                  setLogoFile={setLogoFile}
+                  logoOptions={logoOptions}
+                  setLogoOptions={setLogoOptions}
+                />
+                
+                <TextOptions
+                  textOptions={textOptions}
+                  setTextOptions={setTextOptions}
+                />
+                
+                <CustomizationPanel 
+                  customization={customization}
+                  setCustomization={setCustomization}
+                />
+              </div>
 
-          {/* Right Column - Preview and Export */}
-          <div className="space-y-6">
-            <Preview 
-              qrCodeUrl={qrCodeUrl}
-              qrData={qrData}
-              textOptions={textOptions}
-            />
-            
-            <ExportOptions 
-              qrCodeUrl={qrCodeUrl}
-              qrData={qrData}
-            />
-          </div>
-        </div>
+              {/* Right Column - Preview and Export */}
+              <div className="space-y-6">
+                <Preview 
+                  codeUrl={qrCodeUrl}
+                  codeData={qrData}
+                  textOptions={textOptions}
+                  mode="qr"
+                />
+                
+                <ExportOptions 
+                  codeUrl={qrCodeUrl}
+                  codeData={qrData}
+                  mode="qr"
+                />
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Barcode Mode */}
+            <div className="block lg:hidden space-y-6">
+              <BarcodeGenerator 
+                barcodeData={barcodeData}
+                setBarcodeData={setBarcodeData}
+                barcodeFormat={barcodeFormat}
+                setBarcodeFormat={setBarcodeFormat}
+                customization={barcodeCustomization}
+                setBarcodeUrl={setBarcodeUrl}
+              />
+              
+              <Preview 
+                codeUrl={barcodeUrl}
+                codeData={barcodeData}
+                mode="barcode"
+              />
+              
+              <BarcodeCustomizationPanel 
+                customization={barcodeCustomization}
+                setCustomization={setBarcodeCustomization}
+              />
+              
+              <ExportOptions 
+                codeUrl={barcodeUrl}
+                codeData={barcodeData}
+                mode="barcode"
+                barcodeFormat={barcodeFormat}
+              />
+            </div>
+
+            <div className="hidden lg:grid lg:grid-cols-2 gap-8">
+              <div className="space-y-6">
+                <BarcodeGenerator 
+                  barcodeData={barcodeData}
+                  setBarcodeData={setBarcodeData}
+                  barcodeFormat={barcodeFormat}
+                  setBarcodeFormat={setBarcodeFormat}
+                  customization={barcodeCustomization}
+                  setBarcodeUrl={setBarcodeUrl}
+                />
+                
+                <BarcodeCustomizationPanel 
+                  customization={barcodeCustomization}
+                  setCustomization={setBarcodeCustomization}
+                />
+              </div>
+
+              <div className="space-y-6">
+                <Preview 
+                  codeUrl={barcodeUrl}
+                  codeData={barcodeData}
+                  mode="barcode"
+                />
+                
+                <ExportOptions 
+                  codeUrl={barcodeUrl}
+                  codeData={barcodeData}
+                  mode="barcode"
+                  barcodeFormat={barcodeFormat}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </main>
 
       <footer className="bg-white border-t mt-16">

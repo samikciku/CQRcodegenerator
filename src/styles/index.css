@@ -21,7 +21,8 @@ body {
   padding: 0 1rem;
 }
 
-.qr-preview {
+.qr-preview,
+.barcode-preview {
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   padding: 1rem;

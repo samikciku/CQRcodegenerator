@@ -16,6 +16,7 @@
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "file-saver": "^2.0.5",
+    "jsbarcode": "^3.12.1",
     "jspdf": "^2.5.1",
     "qrcode": "^1.5.3",
     "react": "^18.2.0",
