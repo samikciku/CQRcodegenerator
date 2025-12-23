@@ -13,8 +13,8 @@ const Preview = ({ codeUrl, codeData, textOptions, mode = 'qr' }) => {
       <div className={`${isQR ? 'qr-preview' : 'barcode-preview'} flex flex-col items-center justify-center min-h-[300px]`}>
         {codeUrl ? (
           <div className="text-center w-full">
-            {/* Text Above (QR Code only) */}
-            {isQR && textOptions?.showText && textOptions?.textAbove && (
+            {/* Text Above */}
+            {textOptions?.showText && textOptions?.textAbove && (
               <div className="mb-4">
                 <p 
                   className="text-gray-800 font-medium break-words"
@@ -23,7 +23,7 @@ const Preview = ({ codeUrl, codeData, textOptions, mode = 'qr' }) => {
                     color: textOptions.textColor,
                     textAlign: textOptions.textAlign,
                     fontWeight: textOptions.fontWeight,
-                    maxWidth: '300px',
+                    maxWidth: isBarcode ? '400px' : '300px',
                     margin: '0 auto'
                   }}
                 >
@@ -41,8 +41,8 @@ const Preview = ({ codeUrl, codeData, textOptions, mode = 'qr' }) => {
               />
             </div>
 
-            {/* Text Below (QR Code only) */}
-            {isQR && textOptions?.showText && textOptions?.textBelow && (
+            {/* Text Below */}
+            {textOptions?.showText && textOptions?.textBelow && (
               <div className="mt-4">
                 <p 
                   className="text-gray-800 font-medium break-words"
@@ -51,7 +51,7 @@ const Preview = ({ codeUrl, codeData, textOptions, mode = 'qr' }) => {
                     color: textOptions.textColor,
                     textAlign: textOptions.textAlign,
                     fontWeight: textOptions.fontWeight,
-                    maxWidth: '300px',
+                    maxWidth: isBarcode ? '400px' : '300px',
                     margin: '0 auto'
                   }}
                 >
@@ -66,7 +66,7 @@ const Preview = ({ codeUrl, codeData, textOptions, mode = 'qr' }) => {
                 Scan this QR code with your device
               </p>
             )}
-            {isBarcode && (
+            {isBarcode && !textOptions?.showText && (
               <p className="text-sm text-gray-600 mt-4">
                 Scan this barcode with a barcode scanner
               </p>

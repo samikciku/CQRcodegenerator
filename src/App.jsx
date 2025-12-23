@@ -9,6 +9,7 @@ import BarcodeCustomizationPanel from './components/BarcodeCustomizationPanel'
 import ExportOptions from './components/ExportOptions'
 import LogoUploader from './components/LogoUploader'
 import TextOptions from './components/TextOptions'
+import BarcodeTextOptions from './components/BarcodeTextOptions'
 import PWAInstallPrompt from './components/PWAInstallPrompt'
 import OfflineIndicator from './components/OfflineIndicator'
 import { usePerformanceMonitor } from './hooks/usePerformance'
@@ -59,6 +60,15 @@ function App() {
     fontSize: 20,
     textPosition: 'bottom',
     margin: 10
+  })
+  const [barcodeTextOptions, setBarcodeTextOptions] = useState({
+    showText: false,
+    textAbove: '',
+    textBelow: '',
+    fontSize: 16,
+    textColor: '#000000',
+    textAlign: 'center',
+    fontWeight: 'medium'
   })
 
   // Performance monitoring
@@ -243,7 +253,13 @@ function App() {
               <Preview 
                 codeUrl={barcodeUrl}
                 codeData={barcodeData}
+                textOptions={barcodeTextOptions}
                 mode="barcode"
+              />
+              
+              <BarcodeTextOptions
+                textOptions={barcodeTextOptions}
+                setTextOptions={setBarcodeTextOptions}
               />
               
               <BarcodeCustomizationPanel 
@@ -270,6 +286,11 @@ function App() {
                   setBarcodeUrl={setBarcodeUrl}
                 />
                 
+                <BarcodeTextOptions
+                  textOptions={barcodeTextOptions}
+                  setTextOptions={setBarcodeTextOptions}
+                />
+                
                 <BarcodeCustomizationPanel 
                   customization={barcodeCustomization}
                   setCustomization={setBarcodeCustomization}
@@ -280,6 +301,7 @@ function App() {
                 <Preview 
                   codeUrl={barcodeUrl}
                   codeData={barcodeData}
+                  textOptions={barcodeTextOptions}
                   mode="barcode"
                 />
                 
