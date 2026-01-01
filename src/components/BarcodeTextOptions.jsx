@@ -165,3 +165,5 @@ const BarcodeTextOptions = ({ textOptions, setTextOptions }) => {
 
 export default BarcodeTextOptions
 
+
+

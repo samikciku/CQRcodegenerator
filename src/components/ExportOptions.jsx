@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { exportQRCode, exportBarcode, printBarcode } from '../utils/exportUtils'
+import LabelPrintOptions from './LabelPrintOptions'
 
-const ExportOptions = ({ codeUrl, codeData, mode = 'qr', barcodeFormat }) => {
+const ExportOptions = ({ codeUrl, codeData, mode = 'qr', barcodeFormat, labelOptions, setLabelOptions }) => {
   const [exportOptions, setExportOptions] = useState({
     quality: 0.9,
     dpi: 300,
@@ -9,6 +10,7 @@ const ExportOptions = ({ codeUrl, codeData, mode = 'qr', barcodeFormat }) => {
   })
   const [isExporting, setIsExporting] = useState(false)
   const [printFormat, setPrintFormat] = useState('browser')
+  const [showLabelOptions, setShowLabelOptions] = useState(false)
 
   const handleExport = async (format) => {
     if (!codeUrl) {
@@ -44,7 +46,7 @@ const ExportOptions = ({ codeUrl, codeData, mode = 'qr', barcodeFormat }) => {
 
     setIsExporting(true)
     try {
-      await printBarcode(codeUrl, codeData, barcodeFormat, printFormat)
+      await printBarcode(codeUrl, codeData, barcodeFormat, printFormat, labelOptions)
     } catch (error) {
       console.error('Print error:', error)
       alert('Failed to print barcode. Please try again.')
@@ -161,6 +163,30 @@ const ExportOptions = ({ codeUrl, codeData, mode = 'qr', barcodeFormat }) => {
               ))}
             </select>
           </div>
+
+          {/* Label Options Toggle */}
+          <div className="flex items-center mb-3">
+            <input
+              type="checkbox"
+              id="show-label-options"
+              checked={showLabelOptions}
+              onChange={(e) => setShowLabelOptions(e.target.checked)}
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+            />
+            <label htmlFor="show-label-options" className="ml-2 block text-sm text-gray-700">
+              Configure label printing options
+            </label>
+          </div>
+
+          {/* Label Options Panel */}
+          {showLabelOptions && labelOptions && setLabelOptions && (
+            <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
+              <LabelPrintOptions
+                labelOptions={labelOptions}
+                setLabelOptions={setLabelOptions}
+              />
+            </div>
+          )}
 
           <button
             onClick={handlePrint}

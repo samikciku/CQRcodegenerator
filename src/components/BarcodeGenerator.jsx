@@ -134,3 +134,5 @@ const BarcodeGenerator = ({
 
 export default BarcodeGenerator
 
+
+

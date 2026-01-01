@@ -142,20 +142,38 @@ const exportAsSVG = async (codeDataURL, filename, options) => {
  * @param {string} barcodeData - The barcode data/text
  * @param {string} barcodeFormat - The barcode format (CODE128, EAN13, etc.)
  * @param {string} printFormat - Print format: 'browser', 'zpl', 'epl', 'escpos'
+ * @param {object} labelOptions - Label printing options (dimensions, margins, etc.)
  */
-export const printBarcode = async (barcodeDataURL, barcodeData, barcodeFormat, printFormat = 'browser') => {
+export const printBarcode = async (barcodeDataURL, barcodeData, barcodeFormat, printFormat = 'browser', labelOptions = {}) => {
+  // Default label options
+  const defaultLabelOptions = {
+    width: 50.8,
+    height: 25.4,
+    orientation: 'portrait',
+    marginTop: 2,
+    marginLeft: 2,
+    barcodeX: 5,
+    barcodeY: 5,
+    barcodeWidth: 40,
+    barcodeHeight: 15,
+    quantity: 1,
+    dpi: 203
+  }
+  
+  const options = { ...defaultLabelOptions, ...labelOptions }
+  
   switch (printFormat) {
     case 'browser':
-      await printViaBrowser(barcodeDataURL)
+      await printViaBrowser(barcodeDataURL, options)
       break
     case 'zpl':
-      await printViaZPL(barcodeData, barcodeFormat)
+      await printViaZPL(barcodeData, barcodeFormat, options)
       break
     case 'epl':
-      await printViaEPL(barcodeData, barcodeFormat)
+      await printViaEPL(barcodeData, barcodeFormat, options)
       break
     case 'escpos':
-      await printViaESCPOS(barcodeData, barcodeFormat)
+      await printViaESCPOS(barcodeData, barcodeFormat, options)
       break
     default:
       throw new Error(`Unsupported print format: ${printFormat}`)
@@ -165,39 +183,70 @@ export const printBarcode = async (barcodeDataURL, barcodeData, barcodeFormat, p
 /**
  * Print via browser print dialog
  */
-const printViaBrowser = async (barcodeDataURL) => {
+const printViaBrowser = async (barcodeDataURL, labelOptions) => {
   const printWindow = window.open('', '_blank')
   const img = new Image()
   
+  // Convert mm to pixels (1mm = 3.7795px at 96 DPI, or use label DPI)
+  const mmToPx = (mm, dpi = 96) => (mm * dpi) / 25.4
+  const labelWidthPx = mmToPx(labelOptions.width, labelOptions.dpi || 96)
+  const labelHeightPx = mmToPx(labelOptions.height, labelOptions.dpi || 96)
+  const marginTopPx = mmToPx(labelOptions.marginTop || 0, labelOptions.dpi || 96)
+  const marginLeftPx = mmToPx(labelOptions.marginLeft || 0, labelOptions.dpi || 96)
+  const barcodeXPx = mmToPx(labelOptions.barcodeX || 0, labelOptions.dpi || 96)
+  const barcodeYPx = mmToPx(labelOptions.barcodeY || 0, labelOptions.dpi || 96)
+  const barcodeWidthPx = mmToPx(labelOptions.barcodeWidth || 40, labelOptions.dpi || 96)
+  const barcodeHeightPx = mmToPx(labelOptions.barcodeHeight || 15, labelOptions.dpi || 96)
+  
   return new Promise((resolve, reject) => {
     img.onload = () => {
+      const labels = Array(labelOptions.quantity || 1).fill(0).map((_, i) => {
+        const top = i * labelHeightPx
+        return `
+          <div style="
+            position: relative;
+            width: ${labelWidthPx}px;
+            height: ${labelHeightPx}px;
+            border: 1px dashed #ccc;
+            margin-bottom: ${i < (labelOptions.quantity - 1) ? '10px' : '0'};
+            page-break-after: ${i < (labelOptions.quantity - 1) ? 'always' : 'auto'};
+          ">
+            <img src="${barcodeDataURL}" alt="Barcode" style="
+              position: absolute;
+              left: ${barcodeXPx}px;
+              top: ${barcodeYPx}px;
+              width: ${barcodeWidthPx}px;
+              height: ${barcodeHeightPx}px;
+              object-fit: contain;
+            " />
+          </div>
+        `
+      }).join('')
+      
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
           <head>
-            <title>Print Barcode</title>
+            <title>Print Barcode Labels</title>
             <style>
+              @page {
+                size: ${labelOptions.width}mm ${labelOptions.height}mm;
+                margin: 0;
+              }
               body {
                 margin: 0;
-                padding: 20px;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-              }
-              img {
-                max-width: 100%;
-                height: auto;
+                padding: ${marginTopPx}px ${marginLeftPx}px;
+                font-family: Arial, sans-serif;
               }
               @media print {
                 body {
-                  padding: 0;
+                  padding: ${marginTopPx}px ${marginLeftPx}px;
                 }
               }
             </style>
           </head>
           <body>
-            <img src="${barcodeDataURL}" alt="Barcode" />
+            ${labels}
             <script>
               window.onload = function() {
                 window.print();
@@ -221,7 +270,7 @@ const printViaBrowser = async (barcodeDataURL) => {
 /**
  * Generate ZPL (Zebra Programming Language) commands
  */
-const printViaZPL = async (barcodeData, barcodeFormat) => {
+const printViaZPL = async (barcodeData, barcodeFormat, labelOptions) => {
   // Map barcode formats to ZPL format codes
   const zplFormatMap = {
     'CODE128': 'BC',
@@ -237,29 +286,44 @@ const printViaZPL = async (barcodeData, barcodeFormat) => {
   
   const zplFormat = zplFormatMap[barcodeFormat] || 'BC'
   
-  // Generate ZPL commands
-  // ^XA starts label, ^XZ ends label
-  // ^FO sets field origin (x, y)
-  // ^BY sets bar code field defaults (module width, wide bar width, height)
-  // ^BC creates Code 128 barcode
-  const zpl = `^XA
-^FO50,50
-^BY3,3,100
-^${zplFormat}N,100,Y,N,N
+  // Convert mm to dots (203 DPI: 1mm = 8 dots, 300 DPI: 1mm = 11.81 dots)
+  const dpi = labelOptions.dpi || 203
+  const mmToDots = (mm) => Math.round((mm * dpi) / 25.4)
+  
+  const labelWidth = mmToDots(labelOptions.width || 50.8)
+  const labelHeight = mmToDots(labelOptions.height || 25.4)
+  const barcodeX = mmToDots(labelOptions.barcodeX || 5)
+  const barcodeY = mmToDots(labelOptions.barcodeY || 5)
+  const barcodeHeight = mmToDots(labelOptions.barcodeHeight || 15)
+  const barcodeWidth = Math.round((labelOptions.barcodeWidth || 40) / 10) // Module width (1-10)
+  
+  // Generate ZPL commands for multiple labels
+  let zpl = ''
+  for (let i = 0; i < (labelOptions.quantity || 1); i++) {
+    zpl += `^XA
+^PW${labelWidth}
+^LL${labelHeight}
+^FO${barcodeX},${barcodeY}
+^BY${barcodeWidth},3,${barcodeHeight}
+^${zplFormat}N,${barcodeHeight},Y,N,N
 ^FD${barcodeData}^FS
 ^XZ`
+    if (i < (labelOptions.quantity - 1)) {
+      zpl += '\n'
+    }
+  }
   
   // Download as .zpl file
   const blob = new Blob([zpl], { type: 'text/plain' })
-  saveAs(blob, `barcode-${barcodeData.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '-')}.zpl`)
+  saveAs(blob, `barcode-labels-${barcodeData.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '-')}.zpl`)
   
-  alert('ZPL file downloaded. Send this file to your Zebra printer or use Zebra Setup Utilities to print.')
+  alert(`ZPL file with ${labelOptions.quantity || 1} label(s) downloaded. Send this file to your Zebra printer or use Zebra Setup Utilities to print.`)
 }
 
 /**
  * Generate EPL (Eltron Programming Language) commands
  */
-const printViaEPL = async (barcodeData, barcodeFormat) => {
+const printViaEPL = async (barcodeData, barcodeFormat, labelOptions) => {
   // Map barcode formats to EPL format codes
   const eplFormatMap = {
     'CODE128': 'b',
@@ -275,31 +339,42 @@ const printViaEPL = async (barcodeData, barcodeFormat) => {
   
   const eplFormat = eplFormatMap[barcodeFormat] || 'b'
   
-  // Generate EPL commands
-  // N clears image buffer
-  // O sets label orientation
-  // q sets label width
-  // D sets label length
-  // B creates barcode
-  // P prints label
-  const epl = `N
-O
-q609
-D10
-${eplFormat}50,50,0,1,2,2,100,B,"${barcodeData}"
+  // Convert mm to dots (203 DPI: 1mm = 8 dots)
+  const dpi = labelOptions.dpi || 203
+  const mmToDots = (mm) => Math.round((mm * dpi) / 25.4)
+  
+  const labelWidth = mmToDots(labelOptions.width || 50.8)
+  const labelHeight = mmToDots(labelOptions.height || 25.4)
+  const barcodeX = mmToDots(labelOptions.barcodeX || 5)
+  const barcodeY = mmToDots(labelOptions.barcodeY || 5)
+  const barcodeHeight = mmToDots(labelOptions.barcodeHeight || 15)
+  const barcodeWidth = Math.round((labelOptions.barcodeWidth || 40) / 10) // Module width
+  
+  // Generate EPL commands for multiple labels
+  let epl = ''
+  for (let i = 0; i < (labelOptions.quantity || 1); i++) {
+    epl += `N
+${labelOptions.orientation === 'landscape' ? 'R' : 'O'}
+q${labelWidth}
+D${labelHeight}
+${eplFormat}${barcodeX},${barcodeY},0,1,${barcodeWidth},${barcodeWidth},${barcodeHeight},B,"${barcodeData}"
 P1`
+    if (i < (labelOptions.quantity - 1)) {
+      epl += '\n'
+    }
+  }
   
   // Download as .epl file
   const blob = new Blob([epl], { type: 'text/plain' })
-  saveAs(blob, `barcode-${barcodeData.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '-')}.epl`)
+  saveAs(blob, `barcode-labels-${barcodeData.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '-')}.epl`)
   
-  alert('EPL file downloaded. Send this file to your Eltron printer or use printer utilities to print.')
+  alert(`EPL file with ${labelOptions.quantity || 1} label(s) downloaded. Send this file to your Eltron printer or use printer utilities to print.`)
 }
 
 /**
  * Generate ESC/POS commands for thermal printers
  */
-const printViaESCPOS = async (barcodeData, barcodeFormat) => {
+const printViaESCPOS = async (barcodeData, barcodeFormat, labelOptions) => {
   // Map barcode formats to ESC/POS format codes
   const escposFormatMap = {
     'CODE128': 73, // CODE128
@@ -315,26 +390,62 @@ const printViaESCPOS = async (barcodeData, barcodeFormat) => {
   
   const escposFormat = escposFormatMap[barcodeFormat] || 73
   
-  // ESC/POS commands
-  // ESC @ initializes printer
-  // GS h sets barcode height
-  // GS w sets barcode width
-  // GS H sets HRI (Human Readable Interpretation) position
-  // GS k creates barcode
-  // LF line feed
-  const escpos = new Uint8Array([
-    0x1B, 0x40, // ESC @ - Initialize
-    0x1D, 0x68, 0x64, // GS h 100 - Set height to 100
-    0x1D, 0x77, 0x02, // GS w 2 - Set width to 2
-    0x1D, 0x48, 0x02, // GS H 2 - HRI below barcode
-    0x1D, 0x6B, escposFormat, barcodeData.length, // GS k - Create barcode
-    ...Array.from(barcodeData).map(c => c.charCodeAt(0)),
-    0x0A // LF - Line feed
-  ])
+  // Convert mm to dots for ESC/POS (typically 203 DPI)
+  const dpi = labelOptions.dpi || 203
+  const mmToDots = (mm) => Math.round((mm * dpi) / 25.4)
+  const barcodeHeight = Math.min(255, Math.max(1, mmToDots(labelOptions.barcodeHeight || 15)))
+  const barcodeWidth = Math.min(6, Math.max(1, Math.round((labelOptions.barcodeWidth || 40) / 10)))
+  
+  // Build ESC/POS commands for multiple labels
+  let commands = []
+  
+  for (let i = 0; i < (labelOptions.quantity || 1); i++) {
+    // Initialize printer
+    commands.push(0x1B, 0x40) // ESC @
+    
+    // Set label size (if supported)
+    // Note: ESC/POS has limited label size support, using paper width
+    const paperWidth = mmToDots(labelOptions.width || 50.8)
+    if (paperWidth <= 576) { // Max width for 58mm printer
+      commands.push(0x1D, 0x57, (paperWidth & 0xFF), ((paperWidth >> 8) & 0xFF)) // GS W
+    }
+    
+    // Add margin (feed paper)
+    const marginTop = mmToDots(labelOptions.marginTop || 2)
+    if (marginTop > 0) {
+      commands.push(0x1B, 0x64, Math.min(255, marginTop)) // ESC d - Feed
+    }
+    
+    // Set barcode height
+    commands.push(0x1D, 0x68, barcodeHeight) // GS h
+    
+    // Set barcode width
+    commands.push(0x1D, 0x77, barcodeWidth) // GS w
+    
+    // Set HRI position (Human Readable Interpretation)
+    commands.push(0x1D, 0x48, 0x02) // GS H 2 - Below barcode
+    
+    // Create barcode
+    commands.push(0x1D, 0x6B, escposFormat, barcodeData.length) // GS k
+    commands.push(...Array.from(barcodeData).map(c => c.charCodeAt(0)))
+    
+    // Feed paper for label height
+    const labelHeight = mmToDots(labelOptions.height || 25.4)
+    commands.push(0x1B, 0x64, Math.min(255, labelHeight - barcodeHeight - marginTop)) // ESC d
+    
+    // Cut paper (if supported)
+    commands.push(0x1D, 0x56, 0x00) // GS V 0 - Partial cut
+    
+    // Add separator between labels
+    if (i < (labelOptions.quantity - 1)) {
+      commands.push(0x0A) // LF
+    }
+  }
   
   // Download as .bin file
+  const escpos = new Uint8Array(commands)
   const blob = new Blob([escpos], { type: 'application/octet-stream' })
-  saveAs(blob, `barcode-${barcodeData.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '-')}.bin`)
+  saveAs(blob, `barcode-labels-${barcodeData.substring(0, 20).replace(/[^a-zA-Z0-9]/g, '-')}.bin`)
   
-  alert('ESC/POS file downloaded. Use a serial port tool or printer utility to send this file to your thermal printer.')
+  alert(`ESC/POS file with ${labelOptions.quantity || 1} label(s) downloaded. Use a serial port tool or printer utility to send this file to your thermal printer.`)
 }

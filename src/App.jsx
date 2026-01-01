@@ -70,6 +70,19 @@ function App() {
     textAlign: 'center',
     fontWeight: 'medium'
   })
+  const [labelOptions, setLabelOptions] = useState({
+    width: 50.8, // mm (2 inches)
+    height: 25.4, // mm (1 inch)
+    orientation: 'portrait',
+    marginTop: 2,
+    marginLeft: 2,
+    barcodeX: 5,
+    barcodeY: 5,
+    barcodeWidth: 40,
+    barcodeHeight: 15,
+    quantity: 1,
+    dpi: 203
+  })
 
   // Performance monitoring
   const performanceMetrics = usePerformanceMonitor()
@@ -272,6 +285,8 @@ function App() {
                 codeData={barcodeData}
                 mode="barcode"
                 barcodeFormat={barcodeFormat}
+                labelOptions={labelOptions}
+                setLabelOptions={setLabelOptions}
               />
             </div>
 
@@ -310,6 +325,8 @@ function App() {
                   codeData={barcodeData}
                   mode="barcode"
                   barcodeFormat={barcodeFormat}
+                  labelOptions={labelOptions}
+                  setLabelOptions={setLabelOptions}
                 />
               </div>
             </div>
